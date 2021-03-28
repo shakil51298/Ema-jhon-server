@@ -33,11 +33,20 @@ client.connect(err => {
             res.send(documents)
         })
     })
+
     app.get("/product/:key",(req , res)=>{
         productsCollection.find({key:req.params.key})
         .toArray((err, documents)=>{
-            console.log(documents);
             res.send(documents[0])  
+        })
+    })
+
+    app.post("/productFromKeys",(req , res)=>{
+        const productKeys = req.body;
+        productsCollection.find({key:{ $in: productKeys}})
+        .toArray((err, documents)=>{
+            console.log(documents);
+            // res.send(documents)
         })
     })
 
