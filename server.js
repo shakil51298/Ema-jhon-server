@@ -22,14 +22,12 @@ client.connect(err => {
         productsCollection.insertMany(productsDetails)
         .then(result => {
             res.send(result.insertedCount)
-            console.log(insertedCount);
         })
     })
 
     app.get("/products",(req , res)=>{
         productsCollection.find({}).limit(20) // limit for showing data only 20 array;
         .toArray((err, documents)=>{
-            console.log(documents);
             res.send(documents)
         })
     })
@@ -43,9 +41,9 @@ client.connect(err => {
 
     app.post("/productFromKeys",(req , res)=>{
         const productKeys = req.body;
-        productsCollection.find({key:{ $in: productKeys}})
+        productsCollection.find({key:{ $in:productKeys}})
         .toArray((err, documents)=>{
-            console.log(documents);
+            console.log(err,documents);
             // res.send(documents)
         })
     })
