@@ -1,60 +1,69 @@
-const express = require('express')
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const MongoClient = require('mongodb').MongoClient;
-const bodyParser = require("body-parser");
-const cors = require("cors")
-const port = 5000
 require('dotenv').config()
-
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bptoi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 
 const app = express()
-app.use(bodyParser.json())
-app.use(cors())
+
+app.use(bodyParser.json());
+app.use(cors());
+
+const port = 5000;
+
 
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
   const productsCollection = client.db("Ema-jhon").collection("Products");
-    app.post("/addProducts",(req, res)=>{
-        const productsDetails = req.body;
-        // console.log(productsDetails);
-        productsCollection.insertMany(productsDetails)
+  const ordersCollection = client.db("emaJohnStore").collection("orders");
+  
+    app.post('/addProduct', (req, res) => {
+        const products = req.body;
+        productsCollection.insertOne(products)
         .then(result => {
+            console.log(result.insertedCount);
             res.send(result.insertedCount)
         })
     })
 
-    app.get("/products",(req , res)=>{
-        productsCollection.find({}).limit(20) // limit for showing data only 20 array;
-        .toArray((err, documents)=>{
-            res.send(documents)
+    app.get('/products', (req, res) => {
+        productsCollection.find({})
+        .toArray( (err, documents) => {
+            res.send(documents);
         })
     })
 
-    app.get("/product/:key",(req , res)=>{
-        productsCollection.find({key:req.params.key})
-        .toArray((err, documents)=>{
-            res.send(documents[0])  
+    app.get('/product/:key', (req, res) => {
+        productsCollection.find({key: req.params.key})
+        .toArray( (err, documents) => {
+            res.send(documents[0]);
         })
     })
 
-    app.post("/productFromKeys",(req , res)=>{
+    app.post('/productsByKeys', (req, res) => {
         const productKeys = req.body;
-        productsCollection.find({key:{ $in:productKeys}})
-        .toArray((err, documents)=>{
-            console.log(err,documents);
-            // res.send(documents)
+        productsCollection.find({key: { $in: productKeys} })
+        .toArray( (err, documents) => {
+            res.send(documents);
+        })
+    })
+
+    app.post('/addOrder', (req, res) => {
+        const order = req.body;
+        ordersCollection.insertOne(order)
+        .then(result => {
+            res.send(result.insertedCount > 0)
         })
     })
 
 });
 
-
-app.get('/', (req, res) => {
-  res.send('Hello World!')
+app.get('/', (req, res)=> {
+    res.send("Hello world!!");
 })
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-})
+
+app.listen(port)
