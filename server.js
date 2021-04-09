@@ -11,7 +11,7 @@ const app = express()
 app.use(bodyParser.json());
 app.use(cors());
 
-const port = 5000;
+const port = process.env.PORT || 5000
 
 
 
@@ -24,13 +24,14 @@ client.connect(err => {
         const products = req.body;
         productsCollection.insertOne(products)
         .then(result => {
-            console.log(result.insertedCount);
+            // console.log(result.insertedCount);
             res.send(result.insertedCount)
         })
     })
 
     app.get('/products', (req, res) => {
-        productsCollection.find({})
+        const search = req.query.search;
+        productsCollection.find({name : {$regex :search}})
         .toArray( (err, documents) => {
             res.send(documents);
         })
